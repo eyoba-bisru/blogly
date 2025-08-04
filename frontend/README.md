@@ -1,29 +1,38 @@
-# Blogly Frontend
+# sv
 
-This project contains the frontend code for the Blogly application.
+Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
-## Getting Started
+## Creating a project
 
-1. Install dependencies:
-   ```bash
-   bun install
-   ```
-2. Start the development server:
-   ```bash
-   bun start
-   ```
+If you're seeing this, you've probably already done this step. Congrats!
 
-## Features
+```sh
+# create a new project in the current directory
+npx sv create
 
-- Responsive design
-- Blog post creation and editing
-- User authentication
+# create a new project in my-app
+npx sv create my-app
+```
 
-## Folder Structure
+## Developing
 
-- `src/` - Main source code
-- `public/` - Static assets
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-## Contributing
+```sh
+npm run dev
 
-Feel free to submit issues or pull requests!
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
+
+## Building
+
+To create a production version of your app:
+
+```sh
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
