@@ -8,6 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var db *gorm.DB
+
 func ConnectDB() *gorm.DB {
 
 	dns := os.Getenv("DATABASE_URL")
@@ -15,25 +17,26 @@ func ConnectDB() *gorm.DB {
 		dns = "host=localhost user=postgres password=yourpassword dbname=blogly port=5432 sslmode=disable"
 	}
 
-	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
+	DB, err := gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
 
-	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Category{})
-	db.AutoMigrate(&models.Post{})
-	db.AutoMigrate(&models.Comment{})
-	db.AutoMigrate(&models.Role{
-		Name:        "user",
-		Description: nil,
-	})
-	db.AutoMigrate(&models.Permission{
-		Name:        "read_posts",
-		Description: nil,
-	})
-	db.AutoMigrate(&models.UserRole{})
-	db.AutoMigrate(&models.RolePermission{})
-	db.AutoMigrate(&models.Session{})
+	db = DB
+
+	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.Category{})
+	DB.AutoMigrate(models.Post{})
+	DB.AutoMigrate(&models.Comment{})
+	DB.AutoMigrate(&models.Role{})
+	DB.AutoMigrate(&models.Permission{})
+	DB.AutoMigrate(&models.Session{})
+	return DB
+}
+
+func GetDB() *gorm.DB {
+	if db == nil {
+		panic("Database connection is not initialized")
+	}
 	return db
 }

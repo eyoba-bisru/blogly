@@ -41,26 +41,6 @@ type Permission struct {
 	Roles       []Role    `gorm:"many2many:role_permissions" json:"roles"`
 }
 
-type UserRole struct {
-	gorm.Model
-	UserID    uint      `gorm:"primaryKey;autoIncrement:false" json:"user_id"`
-	User      User      `gorm:"foreignKey:UserID" json:"user"`
-	RoleID    uint      `gorm:"primaryKey;autoIncrement:false" json:"role_id"`
-	Role      Role      `gorm:"foreignKey:RoleID" json:"role"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
-}
-
-type RolePermission struct {
-	gorm.Model
-	RoleID       uint       `gorm:"primaryKey;autoIncrement:false" json:"role_id"`
-	Role         Role       `gorm:"foreignKey:RoleID" json:"role"`
-	PermissionID uint       `gorm:"primaryKey;autoIncrement:false" json:"permission_id"`
-	Permission   Permission `gorm:"foreignKey:PermissionID" json:"permission"`
-	CreatedAt    time.Time  `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt    time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
-}
-
 type Session struct {
 	gorm.Model
 	ID        uint      `gorm:"primaryKey" json:"id"`

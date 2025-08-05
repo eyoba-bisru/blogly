@@ -5,6 +5,7 @@ import (
 
 	"github.com/eyoba-bisru/blogly/backend/config"
 	"github.com/eyoba-bisru/blogly/backend/handlers"
+	"github.com/eyoba-bisru/blogly/backend/seed"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,9 @@ func main() {
 	if db == nil {
 		log.Fatal("Failed to connect to the database")
 	}
+
+	// Seed roles and permissions
+	seed.SeedRolesAndPermissions()
 
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
