@@ -24,5 +24,16 @@ func ConnectDB() *gorm.DB {
 	db.AutoMigrate(&models.Category{})
 	db.AutoMigrate(&models.Post{})
 	db.AutoMigrate(&models.Comment{})
+	db.AutoMigrate(&models.Role{
+		Name:        "user",
+		Description: nil,
+	})
+	db.AutoMigrate(&models.Permission{
+		Name:        "read_posts",
+		Description: nil,
+	})
+	db.AutoMigrate(&models.UserRole{})
+	db.AutoMigrate(&models.RolePermission{})
+	db.AutoMigrate(&models.Session{})
 	return db
 }
