@@ -37,10 +37,9 @@ type Permission struct {
 
 type UserRole struct {
 	gorm.Model
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"not null" json:"user_id"`
+	UserID    uint      `gorm:"primaryKey;autoIncrement:false" json:"user_id"`
 	User      User      `gorm:"foreignKey:UserID" json:"user"`
-	RoleID    uint      `gorm:"not null" json:"role_id"`
+	RoleID    uint      `gorm:"primaryKey;autoIncrement:false" json:"role_id"`
 	Role      Role      `gorm:"foreignKey:RoleID" json:"role"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
@@ -48,10 +47,9 @@ type UserRole struct {
 
 type RolePermission struct {
 	gorm.Model
-	ID           uint       `gorm:"primaryKey" json:"id"`
-	RoleID       uint       `gorm:"not null" json:"role_id"`
+	RoleID       uint       `gorm:"primaryKey;autoIncrement:false" json:"role_id"`
 	Role         Role       `gorm:"foreignKey:RoleID" json:"role"`
-	PermissionID uint       `gorm:"not null" json:"permission_id"`
+	PermissionID uint       `gorm:"primaryKey;autoIncrement:false" json:"permission_id"`
 	Permission   Permission `gorm:"foreignKey:PermissionID" json:"permission"`
 	CreatedAt    time.Time  `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt    time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
