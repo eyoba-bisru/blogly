@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/eyoba-bisru/blogly/backend/config"
+	"github.com/eyoba-bisru/blogly/backend/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -26,5 +27,16 @@ func main() {
 			"message": "Hello, World!",
 		})
 	})
+
+	v1 := r.Group("/api/v1")
+	{
+		authV1 := v1.Group("/auth")
+		{
+			authV1.POST("/register", handlers.Register)
+			authV1.POST("/login", handlers.Login)
+			authV1.POST("/logout", handlers.Logout)
+		}
+	}
+
 	r.Run() // listen and serve on ":8080"
 }
