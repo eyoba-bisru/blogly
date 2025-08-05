@@ -15,15 +15,20 @@ type User struct {
 	IsActive     bool      `gorm:"default:true" json:"is_active"`
 	CreatedAt    time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Roles        []Role    `gorm:"many2many:user_roles" json:"roles"`
+	Sessions     []Session `gorm:"foreignKey:UserID" json:"sessions"`
+	Posts        []Post    `gorm:"foreignKey:UserID" json:"posts"`
+	Comments     []Comment `gorm:"foreignKey:UserID" json:"comments"`
 }
 
 type Role struct {
 	gorm.Model
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Name        string    `gorm:"not null;unique" json:"name"`
-	Description *string   `json:"description"`
-	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	ID          uint         `gorm:"primaryKey" json:"id"`
+	Name        string       `gorm:"not null;unique" json:"name"`
+	Description *string      `json:"description"`
+	CreatedAt   time.Time    `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt   time.Time    `json:"updated_at" gorm:"autoUpdateTime"`
+	Permissions []Permission `gorm:"many2many:role_permissions" json:"permissions"`
 }
 
 type Permission struct {
@@ -33,6 +38,7 @@ type Permission struct {
 	Description *string   `json:"description"`
 	CreatedAt   time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+	Roles       []Role    `gorm:"many2many:role_permissions" json:"roles"`
 }
 
 type UserRole struct {
@@ -62,7 +68,8 @@ type Session struct {
 	User      User      `gorm:"foreignKey:UserID" json:"user"`
 	UserAgent string    `gorm:"not null" json:"user_agent"`
 	IPAddress string    `gorm:"not null" json:"ip_address"`
-	Token     string    `gorm:"not null;unique" json:"token"`
+	Access    string    `gorm:"not null;unique" json:"access"`
+	Refresh   string    `gorm:"not null;unique" json:"refresh"`
 	IsValid   bool      `gorm:"default:true" json:"is_valid"`
 	ExpiresAt time.Time `gorm:"not null" json:"expires_at"`
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
