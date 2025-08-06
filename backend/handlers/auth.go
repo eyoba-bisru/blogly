@@ -212,5 +212,28 @@ func Login(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	// Logout logic here
+	db := config.GetDB()
+	accessToken, err := c.Cookie("access")
+	if err != nil {
+		log.Printf("Error getting access token from cookie: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Access token not found"})
+		return
+	}
+	refreshToken, err := c.Cookie("refresh")
+	if err != nil {
+		log.Printf("Error getting refresh token from cookie: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Refresh token not found"})
+		return
+	}
+
+	// Invalidate the session
+	if err := db.Model(&models.Session{}).Where("access = ? AND refresh = ?", accessToken, refreshToken).Update("is_valid", false).Error; err != nil {
+		log.Printf("Error invalidating session: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to logout"})
+		return
+	}
+	// Clear cookies
+	c.SetCookie("access", "", -1, "/", "localhost", false, true)
+	c.SetCookie("refresh", "", -1, "/", "localhost", false, true)
 	c.JSON(200, gin.H{"message": "User logged out successfully"})
 }
