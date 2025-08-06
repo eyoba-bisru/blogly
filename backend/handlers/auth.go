@@ -144,6 +144,69 @@ func Register(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	// Login logic here
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	db := config.GetDB()
+	var user models.User
+	if err := db.First(&user, "email = ?", req.Email).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+			return
+		}
+		log.Printf("Database error during login: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to login"})
+		return
+	}
+
+	if !helpers.VerifyPassword(req.Password, user.PasswordHash) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		log.Println("SECRET_KEY environment variable not set")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Server configuration error"})
+		return
+	}
+	// Generate access tokens
+	accessTokenString, err := helpers.AccessTokenGenerate(user.Email, secretKey)
+	if err != nil {
+		log.Printf("Error generating access token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
+		return
+	}
+	// Generate refresh token
+	refreshTokenString, err := helpers.RefreshTokenGenerate(user.Email, secretKey)
+	if err != nil {
+		log.Printf("Error generating refresh token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		return
+	}
+
+	c.SetCookie("access", accessTokenString, 3600, "/", "localhost", false, true)
+	c.SetCookie("refresh", refreshTokenString, 24*30*3600, "/", "localhost", false, true)
+	// Create a session for the user
+	session := models.Session{
+		UserID:    user.ID,
+		Access:    accessTokenString,
+		Refresh:   refreshTokenString,
+		UserAgent: c.Request.UserAgent(),
+		IPAddress: c.ClientIP(),
+		IsValid:   true,
+		ExpiresAt: time.Now().Add(24 * time.Hour),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	if err := db.Create(&session).Error; err != nil {
+		log.Printf("Error creating session: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+
 	c.JSON(200, gin.H{"message": "User logged in successfully"})
 }
 
