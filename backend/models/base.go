@@ -14,6 +14,9 @@ type BaseModel struct {
 }
 
 func (base *BaseModel) BeforeCreate(tx *gorm.DB) error {
-	base.ID = uuid.New()
+	if base.ID == uuid.Nil {
+		base.ID = uuid.New()
+	}
+
 	return nil
 }
