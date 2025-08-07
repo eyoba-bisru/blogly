@@ -40,6 +40,11 @@ func main() {
 			authV1.POST("/login", handlers.Login)
 			authV1.POST("/logout", handlers.Logout)
 		}
+
+		postsV1 := v1.Group("/posts")
+		{
+			postsV1.GET("/", handlers.GetPosts)
+		}
 	}
 
 	r.Run() // listen and serve on ":8080"
