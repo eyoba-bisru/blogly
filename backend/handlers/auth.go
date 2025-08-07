@@ -76,17 +76,12 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("access", accessTokenString, 3600, "/", "localhost", false, true)
-	c.SetCookie("refresh", refreshTokenString, 24*30*3600, "/", "localhost", false, true)
-
 	err = db.Transaction(func(tx *gorm.DB) error {
 		newUser := models.User{
 			Email:        req.Email,
 			PasswordHash: hashedPassword,
 			Username:     req.Username,
 			IsActive:     true,
-			CreatedAt:    time.Now(),
-			UpdatedAt:    time.Now(),
 		}
 		if err := tx.Create(&newUser).Error; err != nil {
 			log.Printf("Error saving new user to database: %v", err)
@@ -121,14 +116,15 @@ func Register(c *gin.Context) {
 			IPAddress: c.ClientIP(),
 			IsValid:   true,
 			ExpiresAt: time.Now().Add(24 * time.Hour),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
 		}
 		if err := tx.Create(&session).Error; err != nil {
 			log.Printf("Error creating session: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
 			return err
 		}
+
+		// Set cookies for session
+		c.SetCookie("session", session.ID.String(), 3600, "/", "localhost", false, true)
 
 		return nil
 	})
@@ -143,7 +139,6 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	// Login logic here
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -187,8 +182,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("access", accessTokenString, 3600, "/", "localhost", false, true)
-	c.SetCookie("refresh", refreshTokenString, 24*30*3600, "/", "localhost", false, true)
 	// Create a session for the user
 	session := models.Session{
 		UserID:    user.ID,
@@ -198,8 +191,6 @@ func Login(c *gin.Context) {
 		IPAddress: c.ClientIP(),
 		IsValid:   true,
 		ExpiresAt: time.Now().Add(24 * time.Hour),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 	if err := db.Create(&session).Error; err != nil {
 		log.Printf("Error creating session: %v", err)
@@ -207,33 +198,47 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("session", session.ID.String(), 3600, "/", "localhost", false, true)
+
 	c.JSON(200, gin.H{"message": "User logged in successfully"})
 }
 
 func Logout(c *gin.Context) {
-	// Logout logic here
 	db := config.GetDB()
-	accessToken, err := c.Cookie("access")
+	session, err := c.Cookie("session")
 	if err != nil {
-		log.Printf("Error getting access token from cookie: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Access token not found"})
-		return
-	}
-	refreshToken, err := c.Cookie("refresh")
-	if err != nil {
-		log.Printf("Error getting refresh token from cookie: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Refresh token not found"})
+		log.Printf("Error retrieving session cookie: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Session not found"})
 		return
 	}
 
-	// Invalidate the session
-	if err := db.Model(&models.Session{}).Where("access = ? AND refresh = ?", accessToken, refreshToken).Update("is_valid", false).Error; err != nil {
-		log.Printf("Error invalidating session: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to logout"})
+	// Retrieve the session from the database
+	var sessionModel models.Session
+	if err := db.Find(&sessionModel, "id = ?", session).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session not found"})
+			return
+		}
+		log.Printf("Database error retrieving session: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve session"})
 		return
 	}
-	// Clear cookies
-	c.SetCookie("access", "", -1, "/", "localhost", false, true)
-	c.SetCookie("refresh", "", -1, "/", "localhost", false, true)
+
+	// Check if the session is already invalidated
+	if !sessionModel.IsValid {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Session already invalidated"})
+		return
+	}
+
+	c.SetCookie("session", "", -1, "/", "localhost", false, true)
+
+	// Invalidate the session
+	sessionModel.IsValid = false
+	if err := db.Save(&sessionModel).Error; err != nil {
+		log.Printf("Error invalidating session: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invalidate session"})
+		return
+	}
+
 	c.JSON(200, gin.H{"message": "User logged out successfully"})
 }
