@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -45,4 +47,16 @@ func RefreshTokenGenerate(email, secretKey string) (string, error) {
 		"exp":   time.Now().Add(time.Hour * time.Duration(48)).Unix(),
 		"email": email,
 	}, secretKey, false)
+}
+
+func Slugify(title string) string {
+
+	dateTime := time.Now().Format("2006-01-02-15-04-05")
+
+	slugTitle := strings.ToLower(title)
+	reg := regexp.MustCompile("[^a-z0-9]+")
+	slugTitle = reg.ReplaceAllString(slugTitle, "-")
+	slugTitle = strings.Trim(slugTitle, "-")
+
+	return slugTitle + "-" + dateTime
 }

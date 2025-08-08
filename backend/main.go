@@ -5,6 +5,7 @@ import (
 
 	"github.com/eyoba-bisru/blogly/backend/config"
 	"github.com/eyoba-bisru/blogly/backend/handlers"
+	"github.com/eyoba-bisru/blogly/backend/middlewares"
 	"github.com/eyoba-bisru/blogly/backend/seed"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -45,6 +46,8 @@ func main() {
 		{
 			postsV1.GET("/", handlers.GetPosts)
 			postsV1.GET("/:id", handlers.GetPostByID)
+			postsV1.Use(middlewares.AuthMiddleware())
+			postsV1.POST("/", handlers.CreatePost)
 		}
 	}
 

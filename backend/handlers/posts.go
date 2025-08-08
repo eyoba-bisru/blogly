@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/eyoba-bisru/blogly/backend/config"
+	"github.com/eyoba-bisru/blogly/backend/helpers"
 	"github.com/eyoba-bisru/blogly/backend/models"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func GetPosts(c *gin.Context) {
@@ -39,4 +41,25 @@ func GetPostByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, post)
+}
+
+func CreatePost(c *gin.Context) {
+	db := config.GetDB()
+
+	var post models.Post
+	if err := c.ShouldBindJSON(&post); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	post.UserID = c.MustGet("userID").(uuid.UUID)
+	post.Slug = helpers.Slugify(post.Title)
+	post.Published = false
+
+	if err := db.Create(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, post)
 }

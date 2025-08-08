@@ -17,4 +17,11 @@ func SeedRolesAndPermissions() {
 	userRole := models.Role{Name: "user"}
 	db.FirstOrCreate(&userRole, userRole)
 	db.Model(&userRole).Association("Permissions").Append(&perm)
+
+	// Category
+	category := models.Category{Name: "General", Slug: "general"}
+	db.FirstOrCreate(&category, category)
+
+	category2 := models.Category{Name: "Technology", Slug: "technology"}
+	db.FirstOrCreate(&category2, category2)
 }
