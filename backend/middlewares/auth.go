@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/eyoba-bisru/blogly/backend/config"
 	"github.com/eyoba-bisru/blogly/backend/models"
@@ -23,6 +24,18 @@ func AuthMiddleware() gin.HandlerFunc {
 		var sessionData models.Session
 		if err := db.Where("id = ?", session).First(&sessionData).Error; err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+			c.Abort()
+			return
+		}
+
+		if !sessionData.IsValid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+			c.Abort()
+			return
+		}
+
+		if sessionData.ExpiresAt.Before(time.Now()) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
 			c.Abort()
 			return
 		}
