@@ -17,6 +17,13 @@ func GetPosts(c *gin.Context) {
 		return
 	}
 
+	var count int64
+
+	if posts.Count(&count); count == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No posts found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, posts)
 
 }
