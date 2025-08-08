@@ -44,6 +44,7 @@ func main() {
 		postsV1 := v1.Group("/posts")
 		{
 			postsV1.GET("/", handlers.GetPosts)
+			postsV1.GET("/:id", handlers.GetPostByID)
 		}
 	}
 

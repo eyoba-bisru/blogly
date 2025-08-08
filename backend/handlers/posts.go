@@ -20,3 +20,16 @@ func GetPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 
 }
+
+func GetPostByID(c *gin.Context) {
+	db := config.GetDB()
+	id := c.Param("id")
+
+	var post models.Post
+	if err := db.First(&post, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
+}
