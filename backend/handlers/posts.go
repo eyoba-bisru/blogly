@@ -100,3 +100,27 @@ func UpdatePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, post)
 }
+
+func DeletePost(c *gin.Context) {
+	db := config.GetDB()
+	id := c.Param("id")
+
+	// Validate the ID format
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+		return
+	}
+
+	var post models.Post
+	if err := db.First(&post, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	if err := db.Delete(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
+}

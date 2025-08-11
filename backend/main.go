@@ -49,6 +49,7 @@ func main() {
 			postsV1.Use(middlewares.AuthMiddleware())
 			postsV1.POST("/", handlers.CreatePost)
 			postsV1.PATCH("/:id", handlers.UpdatePost)
+			postsV1.DELETE("/:id", handlers.DeletePost)
 		}
 	}
 
