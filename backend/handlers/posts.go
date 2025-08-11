@@ -49,6 +49,19 @@ func GetPostByID(c *gin.Context) {
 	c.JSON(http.StatusOK, post)
 }
 
+func GetPostBySlug(c *gin.Context) {
+	db := config.GetDB()
+	slug := c.Param("slug")
+
+	var post models.Post
+	if err := db.First(&post, "slug = ?", slug).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
+}
+
 func CreatePost(c *gin.Context) {
 	db := config.GetDB()
 

@@ -46,6 +46,7 @@ func main() {
 		{
 			postsV1.GET("/", handlers.GetPosts)
 			postsV1.GET("/:id", handlers.GetPostByID)
+			postsV1.GET("/slug/:slug", handlers.GetPostBySlug)
 			postsV1.Use(middlewares.AuthMiddleware())
 			postsV1.POST("/", handlers.CreatePost)
 			postsV1.PATCH("/:id", handlers.UpdatePost)
