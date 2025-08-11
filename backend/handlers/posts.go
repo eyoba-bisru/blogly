@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/eyoba-bisru/blogly/backend/config"
@@ -34,8 +33,6 @@ func GetPosts(c *gin.Context) {
 func GetPostByID(c *gin.Context) {
 	db := config.GetDB()
 	id := c.Param("id")
-
-	log.Println(id)
 
 	// Validate the ID format
 	if _, err := uuid.Parse(id); err != nil {
@@ -77,8 +74,14 @@ func UpdatePost(c *gin.Context) {
 	db := config.GetDB()
 	id := c.Param("id")
 
+	// Validate the ID format
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+		return
+	}
+
 	var post models.Post
-	if err := db.First(&post, id).Error; err != nil {
+	if err := db.First(&post, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
