@@ -137,3 +137,37 @@ func DeletePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
+
+func PublishPost(c *gin.Context) {
+	db := config.GetDB()
+	id := c.Param("id")
+
+	userID := c.MustGet("userID").(uuid.UUID)
+
+	// Check if the user has permission to publish posts
+	if helpers.HasPermission(userID, "publish_posts") {
+
+		if _, err := uuid.Parse(id); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+			return
+		}
+
+		var post models.Post
+		if err := db.First(&post, "id = ?", id).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+
+		post.Published = true
+
+		if err := db.Save(&post).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to publish post"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Post published successfully"})
+	} else {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to publish posts"})
+		return
+	}
+
+}

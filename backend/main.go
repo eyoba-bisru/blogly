@@ -51,6 +51,7 @@ func main() {
 			postsV1.POST("/", handlers.CreatePost)
 			postsV1.PATCH("/:id", handlers.UpdatePost)
 			postsV1.DELETE("/:id", handlers.DeletePost)
+			postsV1.POST("/publish/:id", handlers.PublishPost)
 		}
 	}
 
