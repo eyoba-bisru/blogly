@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/eyoba-bisru/blogly/backend/config"
@@ -34,8 +35,16 @@ func GetPostByID(c *gin.Context) {
 	db := config.GetDB()
 	id := c.Param("id")
 
+	log.Println(id)
+
+	// Validate the ID format
+	if _, err := uuid.Parse(id); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID format"})
+		return
+	}
+
 	var post models.Post
-	if err := db.First(&post, id).Error; err != nil {
+	if err := db.First(&post, "id = ?", id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
@@ -62,4 +71,29 @@ func CreatePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, post)
+}
+
+func UpdatePost(c *gin.Context) {
+	db := config.GetDB()
+	id := c.Param("id")
+
+	var post models.Post
+	if err := db.First(&post, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&post); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	post.Slug = helpers.Slugify(post.Title)
+
+	if err := db.Save(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
 }
