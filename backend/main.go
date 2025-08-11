@@ -47,12 +47,15 @@ func main() {
 			postsV1.GET("/", handlers.GetPosts)
 			postsV1.GET("/:id", handlers.GetPostByID)
 			postsV1.GET("/slug/:slug", handlers.GetPostBySlug)
+			postsV1.GET("/:id/comments", handlers.GetPostComments)
 			postsV1.Use(middlewares.AuthMiddleware())
 			postsV1.POST("/", handlers.CreatePost)
 			postsV1.PATCH("/:id", handlers.UpdatePost)
 			postsV1.DELETE("/:id", handlers.DeletePost)
 			postsV1.POST("/publish/:id", handlers.PublishPost)
+			postsV1.POST("/:id/comments", handlers.CreateComment)
 		}
+
 	}
 
 	r.Run() // listen and serve on ":8080"
