@@ -77,17 +77,6 @@ func Register(c *gin.Context) {
 	}
 
 	err = db.Transaction(func(tx *gorm.DB) error {
-		newUser := models.User{
-			Email:        req.Email,
-			PasswordHash: hashedPassword,
-			Username:     req.Username,
-			IsActive:     true,
-		}
-		if err := tx.Create(&newUser).Error; err != nil {
-			log.Printf("Error saving new user to database: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
-			return err
-		}
 
 		// Create default role if it doesn't exist
 		defaultRole := models.Role{
@@ -99,11 +88,16 @@ func Register(c *gin.Context) {
 			return err
 		}
 
-		// Assign default role to the user
-		err = tx.Model(&newUser).Association("Roles").Append(&defaultRole)
-		if err != nil {
-			log.Printf("Error assigning role to user: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign role"})
+		newUser := models.User{
+			Email:        req.Email,
+			PasswordHash: hashedPassword,
+			Username:     req.Username,
+			IsActive:     true,
+			RoleID:       defaultRole.ID,
+		}
+		if err := tx.Create(&newUser).Error; err != nil {
+			log.Printf("Error saving new user to database: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 			return err
 		}
 
