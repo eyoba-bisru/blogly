@@ -7,6 +7,7 @@ import (
 	"github.com/eyoba-bisru/blogly/backend/handlers"
 	"github.com/eyoba-bisru/blogly/backend/middlewares"
 	"github.com/eyoba-bisru/blogly/backend/seed"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -27,6 +28,9 @@ func main() {
 	seed.SeedRolesAndPermissions()
 
 	r := gin.Default()
+
+	r.Use(cors.Default())
+
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello, World!",
