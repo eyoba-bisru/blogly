@@ -55,27 +55,6 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	secretKey := os.Getenv("SECRET_KEY")
-	if secretKey == "" {
-		log.Println("SECRET_KEY environment variable not set")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Server configuration error"})
-		return
-	}
-	// Generate access tokens
-	accessTokenString, err := helpers.AccessTokenGenerate(req.Email, secretKey)
-	if err != nil {
-		log.Printf("Error generating access token: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
-		return
-	}
-	// Generate refresh token
-	refreshTokenString, err := helpers.RefreshTokenGenerate(req.Email, secretKey)
-	if err != nil {
-		log.Printf("Error generating refresh token: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
-		return
-	}
-
 	err = db.Transaction(func(tx *gorm.DB) error {
 
 		// Create default role if it doesn't exist
@@ -100,25 +79,6 @@ func Register(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 			return err
 		}
-
-		// Create a session for the user
-		session := models.Session{
-			UserID:    newUser.ID,
-			Access:    accessTokenString,
-			Refresh:   refreshTokenString,
-			UserAgent: c.Request.UserAgent(),
-			IPAddress: c.ClientIP(),
-			IsValid:   true,
-			ExpiresAt: time.Now().Add(24 * time.Hour),
-		}
-		if err := tx.Create(&session).Error; err != nil {
-			log.Printf("Error creating session: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
-			return err
-		}
-
-		// Set cookies for session
-		c.SetCookie("session", session.ID.String(), 3600, "/", "localhost", false, true)
 
 		return nil
 	})
