@@ -1,9 +1,9 @@
 package seed
 
 import (
-	"github.com/eyoba-bisru/blogly/backend/config"
-	"github.com/eyoba-bisru/blogly/backend/helpers"
-	"github.com/eyoba-bisru/blogly/backend/models"
+	"github.com/eyoba-bisru/blogly/config"
+	"github.com/eyoba-bisru/blogly/helpers"
+	"github.com/eyoba-bisru/blogly/models"
 )
 
 func SeedRolesAndPermissions() {

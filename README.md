@@ -1,39 +1,26 @@
-# Blogly
+# Blogly Backend
 
-A simple blogging platform built with Next.js and Go Gin framework.
-
-## Features
-
-- Create, edit, and delete blog posts
-- User authentication
-- Responsive design
+This is the backend service for the Blogly project, built with the [Gin](https://gin-gonic.com/) Go web framework.
 
 ## Setup
 
-1. Clone the repository:
+1. Clone the repository.
+2. Install dependencies:
    ```bash
-   git clone https://github.com/yourusername/blogly.git
-   cd blogly
-   ```
-2. Install dependencies for Next.js:
-   ```bash
-   cd frontend
-   bun install
-   ```
-3. Install dependencies for Go Gin backend:
-   ```bash
-   cd ../backend
    go mod tidy
    ```
-4. Run the backend server:
+3. For development, use [Air](https://github.com/cosmtrek/air) for live reloading:
    ```bash
-   go run main.go
+   go install github.com/cosmtrek/air@latest
+   air
    ```
-5. Run the frontend:
-   ```bash
-   cd ../frontend
-   bun run dev
-   ```
+4. Configure environment variables as needed.
+
+## Running the Server
+
+```bash
+go run main.go
+```
 
 ## License
 

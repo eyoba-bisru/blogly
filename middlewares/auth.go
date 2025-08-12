@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/eyoba-bisru/blogly/backend/config"
-	"github.com/eyoba-bisru/blogly/backend/models"
+	"github.com/eyoba-bisru/blogly/config"
+	"github.com/eyoba-bisru/blogly/models"
 	"github.com/gin-gonic/gin"
 )
 

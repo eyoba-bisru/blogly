@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	"github.com/eyoba-bisru/blogly/backend/models"
+	"github.com/eyoba-bisru/blogly/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

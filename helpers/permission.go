@@ -3,8 +3,8 @@ package helpers
 import (
 	"log"
 
-	"github.com/eyoba-bisru/blogly/backend/config"
-	"github.com/eyoba-bisru/blogly/backend/models"
+	"github.com/eyoba-bisru/blogly/config"
+	"github.com/eyoba-bisru/blogly/models"
 	"github.com/google/uuid"
 )
 
